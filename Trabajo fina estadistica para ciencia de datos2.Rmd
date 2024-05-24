@@ -1,0 +1,257 @@
+---
+title: 'trabajo Final '
+author: "Harrys  Lozano"
+date: "`r Sys.Date()`"
+output:
+  html_document: default
+  ---
+Los datos usado en presente trabajo proporciona una descripción de los datos recopilados de una encuesta a productores de cacao en la provincia de  Esmeraldas. La encuesta recopiló información sobre las características demográficas de los productores, sus prácticas agrícolas, sus percepciones sobre el cambio climático y su disposición a adoptar medidas.
+
+Descripción de las variables
+
+Edad: Edad de los productores en años.
+Nivel educativo: Nivel educativo más alto alcanzado por los productores (sin estudios, primaria, secundaria, etc.).
+Tamaño de la finca: Tamaño de la finca de cacao en hectáreas.
+Tipo de cacao cultivado: Tipo de cacao cultivado por los productores (cacao forastero, cacao criollo, etc.).
+Género: Género de los productores (hombre, mujer).
+Prácticas agrícolas: Prácticas agrícolas utilizadas por los productores (manejo del suelo, control de plagas y enfermedades, riego, etc.).
+Época de mayor producción: Época del año en que los productores obtienen la mayor producción de cacao.
+Medios de información sobre el cambio climático: Medios por los cuales los productores se han informado sobre el cambio climático (radio, televisión, talleres, etc.).
+Percepción sobre la contribución de las actividades económicas al cambio climático: Percepción de los productores sobre la contribución de las actividades económicas al cambio climático (mucha, alguna, poca, ninguna).
+Percepción sobre la relación entre sequías, inundaciones y cambio climático: Percepción de los productores sobre la relación entre sequías, inundaciones y cambio climático (fuerte, moderada, débil, ninguna).
+Afectaciones en la producción de cacao por sequías: Afectaciones en la producción de cacao por sequías reportadas por los productores (ninguna, leve, moderada, severa).
+Percepción sobre la relación entre lluvias intensas y proliferación de plagas: Percepción de los productores sobre la relación entre lluvias intensas y proliferación de plagas (fuerte, moderada, débil, ninguna).
+Percepción sobre la relación entre enfermedades y cambio climático: Percepción de los productores sobre la relación entre enfermedades y cambio climático (fuerte, moderada, débil, ninguna).
+Disposición a recibir capacitaciones sobre mitigación del cambio climático: Disposición de los productores a recibir capacitaciones sobre mitigación del cambio climático (sí, no).
+Percepción sobre la importancia de buenas prácticas agrícolas para aumentar la producción: Percepción de los productores sobre la importancia de buenas prácticas agrícolas para aumentar la producción (mucha, alguna, poca, ninguna).
+Disposición a adoptar nuevas medidas de manejo y conservación: Disposición de los productores a adoptar nuevas medidas de manejo y conservación (sí, no).
+Percepción sobre la necesidad de informarse sobre el cambio climático y la agricultura: Percepción de los productores sobre la necesidad de informarse sobre el cambio climático y la agricultura (sí, no).
+
+
+```{r message=FALSE, warning=FALSE}
+library("readxlsb")
+library("tidyverse")
+library("readxl")
+library("summarytools")
+library("compareGroups")
+library(MASS)
+library("lattice")
+library(lattice)
+library(dplyr)
+library(heatmaply)
+DELIANA<-read_excel("ENCUESTANUVIA1.xlsx")
+DELIANA
+```
+
+## Visualización de datos
+Vamos a conocer de los datos nombre de columnas y así tambien numero de columnas y filas, numero de variables y respectivas categorias, nombre de columnas
+y para vamos usas varias funciones que no ayudan a realizar esto, como las siguientes 
+```{r message=TRUE, warning=FALSE}
+head(DELIANA)
+dim(DELIANA)
+nrow(DELIANA)
+ncol(DELIANA)
+str(DELIANA)
+colnames(DELIANA)
+
+```
+
+
+
+
+
+Analisis descriptivos de de variables categoricas 
+
+
+```{r message=FALSE, warning=FALSE}
+#Deterinacion de frecuencias de de una varibles y de todas la varibles
+freq(DELIANA$`2   Rango de edad`, report.nas = FALSE, headings = FALSE)
+freq (DELIANA, report.nas = FALSE, headings = FALSE)
+```
+
+## Tabla de contingencia
+
+Creacion de tablas de contigencia para identificar relaciones o asociaciones entre dos o más variables categóricas por ejemplo numero de hectarias de la finca versos nivel de instrucion o tipo de trabajo en su finca 
+
+
+```{r}
+#tablas cruzadas o de contgencia  DE RANGO DE EDAD Y NIVEL DE EDUCACION 
+ctable(DELIANA$`2   Rango de edad`,  DELIANA$`3   Nivel de educacion`, prop="r")
+
+```
+#Principales estadisticos DE VARIABLES CONTINUAS
+En la base datos existen solo dos variables continuas que son cuanto dinero gana año en una hectarea y cuando invierte por hectarea de cacao para su mantenimiento 
+
+```{r message=FALSE, warning=FALSE}
+descr(DELIANA)
+
+```
+En los siguiente parte se analiza una variables categorica respecto a las dos variables continua y así se puede analizar comparación de grupos de edad verso inversión por hectara y ganancias por hectareas
+
+
+```{r message=TRUE, warning=TRUE}
+#Analisis de a rango de edad versus las variables continuas donde generara los descriptivos mas comunes 
+stby(DELIANA, INDICES = DELIANA$`2   Rango de edad`,
+     FUN = descr, stats = "common", transpose = TRUE)
+#Analisis de a rango de edad versus las variables continuas donde generara todos los descriptivos por que no se usa el comando common
+
+stby(DELIANA, INDICES = DELIANA$`2   Rango de edad`,
+     FUN = descr, transpose = TRUE)
+
+```
+
+ Resumen de todos mis datos con la función `dfSummary()
+
+
+```{r message=FALSE, warning=FALSE}
+dfSummary(DELIANA)
+
+print(dfSummary(DELIANA, graph.magnif = 0.75), method = 'render')
+```
+
+
+Realización de gráficos de variables continuas de en este caso pregunta 21 y 22 
+
+
+```{r message=FALSE, warning=FALSE}
+#Grafico con variables continuas usando la función stem
+stem(DELIANA$`22 Inversion estimado por ano por hectarea USD`)
+stem(DELIANA$`21 Ingreso estimado por Hectaria USD`)
+# gráfico con la función boxplot de las dos variables continuas 
+
+par(mfrow=c(1, 1))
+boxplot(`22 Inversion estimado por ano por hectarea USD` ~ `1   Sexo`, data=DELIANA,
+        col=c('lightblue', 'pink'),
+        xlab="Sexo", main='Digrama de Cajas Sexo e Inversion por Hectarea',
+        ylab="Inversion por ano en una hectarea")
+
+
+boxplot(`22 Inversion estimado por ano por hectarea USD` ~ `3   Nivel de educacion`*`1   Sexo`, data=DELIANA,
+        col=c('lightblue', 'pink'),
+        xlab="Sexo", main='Digrama de Cajas Sexo y Nivel de Educacion vs Inversion por Hectarea',
+        ylab="Inversion por ano en una hectarea")
+
+
+
+```
+Seguimos con gráficos descriptivos por ejemplo vamos hacer un Histogramas
+
+```{r message=FALSE, warning=FALSE}
+hist(DELIANA$`22 Inversion estimado por ano por hectarea USD`, col='blue', main='', 
+     ylab='Inversion de Mantenimiento del Cacao ')
+
+```
+Grafico de densidad
+
+```{r message=FALSE, warning=FALSE}
+plot(density(DELIANA$`22 Inversion estimado por ano por hectarea USD`, na.rm=TRUE))
+par(mfrow=c(2,2))
+plot(density(DELIANA$`22 Inversion estimado por ano por hectarea USD`, na.rm=TRUE), main='')
+plot(density(DELIANA$`22 Inversion estimado por ano por hectarea USD`, bw=0.2, na.rm=TRUE), main='')
+plot(density(DELIANA$`22 Inversion estimado por ano por hectarea USD`, bw=5, na.rm=TRUE), main='')
+plot(density(DELIANA$`22 Inversion estimado por ano por hectarea USD`, bw=10, na.rm=TRUE), main='')
+
+```
+
+Regresión Lineal 
+
+
+```{r message=FALSE, warning=FALSE}
+plot(DELIANA$`22 Inversion estimado por ano por hectarea USD`, DELIANA$`21 Ingreso estimado por Hectaria USD`, ylab="Ganacia al anual",
+     xlab="Inversion Anual de mantenimiento", main="Mantenimiento y Ganancia al anual")
+
+plot(DELIANA$`22 Inversion estimado por ano por hectarea USD`, DELIANA$`21 Ingreso estimado por Hectaria USD`)
+lines(loess.smooth(DELIANA$`22 Inversion estimado por ano por hectarea USD`, DELIANA$`21 Ingreso estimado por Hectaria USD`))
+
+modE <- lm(`22 Inversion estimado por ano por hectarea USD` ~ `21 Ingreso estimado por Hectaria USD`, data=DELIANA)
+modE
+abline(modE)
+# esto no sivió por motivo que la regresiones son no lineales 
+```
+
+Asi vamos hacer graficos de dispersión con todas las variables continuas con pairs
+
+```{r message=FALSE, warning=FALSE}
+pairs(DELIANA[,22:23])
+
+```
+Graficos de varibles Categoricas
+```{r message=FALSE, warning=FALSE}
+# Grafico 1 de una sola  varible categorica 
+info <- prop.table(table(DELIANA$`2   Rango de edad`))
+info
+barplot(info, las=2)
+# Grafico 1 de dos  varibles categoricas
+
+info2 <- table(DELIANA$`1   Sexo`,
+               DELIANA$`3   Nivel de educacion`)
+
+barplot(info2, las=2)
+# y para visualizar de mejor manera
+barplot(info2, beside = TRUE, las=2, 
+        xlab ='', ylab ='Frecuencia', 
+        ylim = c(0,400), 
+        main = 'Rango de Edad y Nivel de Instruccion', 
+        col = c("lightblue", "mistyrose"),)
+legend('topleft', legend = rownames(info2), 
+       bty='n', fill=c("lightblue", "mistyrose"))
+
+```
+
+```{r}
+pie(info, main="Rango de Edad")
+
+dotchart(info, 
+         main = "Distribucion por Grupos de Edad",
+         xlab = "Proporcion",
+         ylab = "Grupos de Edad",
+         pch = 19, # Tipo de punto
+         col = "blue") # Color de los puntos
+         cex = 1.5 # Tamaño de los puntos y etiquetas
+```
+
+```{r message=FALSE, warning=FALSE}
+library(lattice)
+
+
+
+xyplot(`1   Sexo`~ `21 Ingreso estimado por Hectaria USD` | `2   Rango de edad`, data=DELIANA)
+
+
+bwplot(`2   Rango de edad` ~ `21 Ingreso estimado por Hectaria USD` | `6   Practica agricola de mayor uso para el cultivo de cacao`,
+        data = DELIANA)
+qqmath(`2   Rango de edad` ~ `21 Ingreso estimado por Hectaria USD` | `6   Practica agricola de mayor uso para el cultivo de cacao`,
+        data = DELIANA)
+
+```
+#Elaboración de un cluster de las encuestas
+```{r message=TRUE, warning=FALSE}
+
+DATOSPARACLUSTER <-
+        as.data.frame(DELIANA) %>%
+        select(-`2   Rango de edad`, -n, -`22 Inversion estimado por ano por hectarea USD`, `21 Ingreso estimado por Hectaria USD`)
+DATOSPARACLUSTER
+rownames(DATOSPARACLUSTER) <- make.unique(rownames(DATOSPARACLUSTER))
+
+rownames(DELIANA) <- make.unique(rownames(DELIANA))
+DATOSPARACLUSTER
+
+
+#row.names(DATOSPARACLUSTER) <- DELIANA %>%  pull(`2   Rango de edad`)
+
+
+#heatmaply(DATOSPARACLUSTER,
+ #         seriate = "mean",
+  #        row_dend_left = FALSE,
+   #       plot_method = "plotly")
+
+
+
+
+```
+
+
+Comclusiones de trabajo:
+
+
+
